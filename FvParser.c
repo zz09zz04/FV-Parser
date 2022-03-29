@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "SetScreenColor.c"
+
+
 #if defined(_WIN32) || defined(__WIN32__)
 
 #include <stdint.h>
@@ -9,21 +12,20 @@ typedef uint16_t u_int16_t;
 typedef uint32_t u_int32_t;
 typedef uint64_t u_int64_t;
 
-#include <windows.h>
-
-#elif
+#else
 
 typedef struct {
-	u_int32_t	Data1;
-	u_int16_t	Data2;
-	u_int16_t	Data3;
-	u_int8_t	Data4[8];
+  u_int32_t  Data1;
+  u_int16_t  Data2;
+  u_int16_t  Data3;
+  u_int8_t   Data4[8];
 } GUID;
 
 #endif
 
+#define EFI_FIRMWARE_FILE_SYSTEM2_GUID	 { 0x8c8ce578, 0x8a3d, 0x4f1c, { 0x99, 0x35, 0x89, 0x61, 0x85, 0xc3, 0x2d, 0xd3 } }
 #define EFI_FIRMWARE_FILE_SYSTEM3_GUID  { 0x5473c07a, 0x3dcb, 0x4dca, { 0xbd, 0x6f, 0x1e, 0x96, 0x89, 0xe7, 0x34, 0x9a } }
-#define EFI_FFS_VOLUME_TOP_FILE_GUID    { 0x1BA0062E, 0xC779, 0x4582, 0x85, 0x66, 0x33, 0x6A, 0xE8, 0xF7, 0x8F, 0x9 }
+#define EFI_FFS_VOLUME_TOP_FILE_GUID    { 0x1BA0062E, 0xC779, 0x4582, { 0x85, 0x66, 0x33, 0x6A, 0xE8, 0xF7, 0x8F, 0x9 } }
 
 
 
@@ -48,7 +50,7 @@ typedef struct {
 #define FFS_FILE2_SIZE(FfsFileHeaderPtr) \
     (((EFI_FFS_FILE_HEADER2 *) (u_int64_t) FfsFileHeaderPtr)->ExtendedSize)
 
-#define EFI_FIRMWARE_FILE_SYSTEM2_GUID	
+
 
 
 //#define	FILE_NAME	"FVRECOVERY.Fv"
@@ -60,8 +62,8 @@ typedef u_int32_t EFI_FVB_ATTRIBUTES_2;
 #pragma pack(1)
 
 typedef struct {
-	u_int32_t NumBlocks;
-	u_int32_t Length;
+  u_int32_t NumBlocks;
+  u_int32_t Length;
 } EFI_FV_BLOCK_MAP;
 
 typedef struct {
@@ -79,11 +81,11 @@ typedef struct {
 } EFI_FIRMWARE_VOLUME_HEADER;
 
 typedef union {
-	struct {
-		u_int8_t	Header;
-		u_int8_t	File;
-	}				Checksum;
-	u_int16_t		Checksum16;
+  struct {
+  u_int8_t Header;
+  u_int8_t File;
+  }            Checksum;
+  u_int16_t    Checksum16;
 } EFI_FFS_INTEGRITY_CHECK;
 
 typedef u_int8_t EFI_FV_FILETYPE;
@@ -114,44 +116,13 @@ typedef struct {
 #pragma pack()
 
 
-#define BLUE_TEXT   FOREGROUND_BLUE
-#define GREEN_TEXT  FOREGROUND_GREEN
-#define RED_TEXT    FOREGROUND_RED
-#define CYAN_TEXT   FOREGROUND_BLUE | FOREGROUND_GREEN
-#define PURPLE_TEXT FOREGROUND_BLUE | FOREGROUND_RED
-#define ORANGE_TEXT FOREGROUND_GREEN | FOREGROUND_RED
-#define WHITE_TEXT  FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED
-#define GRAY_TEXT   FOREGROUND_INTENSITY
-#define LIGHTBLUE_TEXT   FOREGROUND_BLUE | FOREGROUND_INTENSITY
-#define LIGHTGREEN_TEXT  FOREGROUND_GREEN | FOREGROUND_INTENSITY
-#define LIGHTRED_TEXT    FOREGROUND_RED | FOREGROUND_INTENSITY
-#define LIGHTCYAN_TEXT   FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY
-#define LIGHTPURPLE_TEXT FOREGROUND_BLUE | FOREGROUND_RED | FOREGROUND_INTENSITY
-#define LIGHTORANGE_TEXT FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY
 
 
-GUID FirmwareFileSystem2Guid = {0x8c8ce578, 0x8a3d, 0x4f1c, 0x99, 0x35, 0x89, 0x61, 0x85, 0xc3, 0x2d, 0xd3};
+GUID FirmwareFileSystem2Guid = EFI_FIRMWARE_FILE_SYSTEM2_GUID;
 GUID FirmwareFileSystem3Guid = EFI_FIRMWARE_FILE_SYSTEM3_GUID;
 
 
-int SetScreenColor (WORD TextColor) {
-    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-    CONSOLE_SCREEN_BUFFER_INFO consoleInfo;
-    WORD saved_attributes;
 
-    // Save current attributes 
-    GetConsoleScreenBufferInfo(hConsole, &consoleInfo);
-    saved_attributes = consoleInfo.wAttributes;
-
-    SetConsoleTextAttribute(hConsole, TextColor);
-//    printf("This is some nice COLORFUL text, isn't it? 0x%x\n", saved_attributes);
-
-    // Restore original attributes 
-//    SetConsoleTextAttribute(hConsole, saved_attributes);
-//    printf("Back to normal 0x%x\n", saved_attributes);
-
-    return 0;
-}
 
 
 long InternalGetFileSize (char *FileName)
