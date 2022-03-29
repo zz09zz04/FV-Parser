@@ -1,14 +1,30 @@
 #include <stdio.h>
 #include <stdlib.h>
+
+#if defined(_WIN32) || defined(__WIN32__)
+
+#include <stdint.h>
+typedef uint8_t u_int8_t;
+typedef uint16_t u_int16_t;
+typedef uint32_t u_int32_t;
+typedef uint64_t u_int64_t;
+
 #include <windows.h>
 
-//#ifdef  __WIN32__
-#include <stdint.h>
-typedef   uint8_t u_int8_t;
-typedef   uint16_t u_int16_t;
-typedef   uint32_t u_int32_t;
-typedef   uint64_t u_int64_t;
-//#endif
+#elif
+
+typedef struct {
+	u_int32_t	Data1;
+	u_int16_t	Data2;
+	u_int16_t	Data3;
+	u_int8_t	Data4[8];
+} GUID;
+
+#endif
+
+#define EFI_FIRMWARE_FILE_SYSTEM3_GUID  { 0x5473c07a, 0x3dcb, 0x4dca, { 0xbd, 0x6f, 0x1e, 0x96, 0x89, 0xe7, 0x34, 0x9a } }
+#define EFI_FFS_VOLUME_TOP_FILE_GUID    { 0x1BA0062E, 0xC779, 0x4582, 0x85, 0x66, 0x33, 0x6A, 0xE8, 0xF7, 0x8F, 0x9 }
+
 
 
 #define	Print	printf
@@ -36,15 +52,9 @@ typedef   uint64_t u_int64_t;
 
 
 //#define	FILE_NAME	"FVRECOVERY.Fv"
-#define	FILE_NAME	"MAIN.fd"
-/*
-typedef struct {
-	u_int32_t	Data1;
-	u_int16_t	Data2;
-	u_int16_t	Data3;
-	u_int8_t	Data4[8];
-} GUID;
-*/
+#define	FILE_NAME	"FVOSBOOT.Fv"
+
+
 typedef u_int32_t EFI_FVB_ATTRIBUTES_2;
 
 #pragma pack(1)
@@ -55,17 +65,17 @@ typedef struct {
 } EFI_FV_BLOCK_MAP;
 
 typedef struct {
-	u_int8_t  				ZeroVector[16];
-	GUID   				FileSystemGuid;
-	u_int64_t 				FvLength;
-	u_int32_t 				Signature;
-	EFI_FVB_ATTRIBUTES_2	Attributes;
-	u_int16_t				HeaderLength;
-	u_int16_t 				Checksum;
-	u_int16_t 				ExtHeaderOffset;
-	u_int8_t  				Reserved[1];
-	u_int8_t  				Revision;
-	EFI_FV_BLOCK_MAP 		BlockMap[];
+  u_int8_t              ZeroVector[16];
+  GUID                  FileSystemGuid;
+  u_int64_t             FvLength;
+  u_int32_t             Signature;
+  EFI_FVB_ATTRIBUTES_2  Attributes;
+  u_int16_t             HeaderLength;
+  u_int16_t             Checksum;
+  u_int16_t             ExtHeaderOffset;
+  u_int8_t              Reserved[1];
+  u_int8_t              Revision;
+  EFI_FV_BLOCK_MAP      BlockMap[];
 } EFI_FIRMWARE_VOLUME_HEADER;
 
 typedef union {
@@ -83,22 +93,22 @@ typedef u_int8_t EFI_FFS_FILE_ATTRIBUTES;
 typedef u_int8_t EFI_FFS_FILE_STATE;
 
 typedef struct {
-	GUID						Name;
-	EFI_FFS_INTEGRITY_CHECK	IntegrityCheck;
-	EFI_FV_FILETYPE			Type;
-	EFI_FFS_FILE_ATTRIBUTES	Attributes;
-	u_int8_t					Size[3];
-	EFI_FFS_FILE_STATE		State;
+  GUID                    Name;
+  EFI_FFS_INTEGRITY_CHECK IntegrityCheck;
+  EFI_FV_FILETYPE         Type;
+  EFI_FFS_FILE_ATTRIBUTES Attributes;
+  u_int8_t                Size[3];
+  EFI_FFS_FILE_STATE      State;
 } EFI_FFS_FILE_HEADER;
 
 typedef struct {
-	GUID						Name;
-	EFI_FFS_INTEGRITY_CHECK	IntegrityCheck;
-	EFI_FV_FILETYPE			Type;
-	EFI_FFS_FILE_ATTRIBUTES	Attributes;
-	u_int8_t					Size[3];
-	EFI_FFS_FILE_STATE		State;
-	u_int64_t					ExtendedSize;
+  GUID                    Name;
+  EFI_FFS_INTEGRITY_CHECK IntegrityCheck;
+  EFI_FV_FILETYPE         Type;
+  EFI_FFS_FILE_ATTRIBUTES Attributes;
+  u_int8_t                Size[3];
+  EFI_FFS_FILE_STATE      State;
+  u_int64_t               ExtendedSize;
 } EFI_FFS_FILE_HEADER2;
 
 #pragma pack()
@@ -118,6 +128,11 @@ typedef struct {
 #define LIGHTCYAN_TEXT   FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY
 #define LIGHTPURPLE_TEXT FOREGROUND_BLUE | FOREGROUND_RED | FOREGROUND_INTENSITY
 #define LIGHTORANGE_TEXT FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY
+
+
+GUID FirmwareFileSystem2Guid = {0x8c8ce578, 0x8a3d, 0x4f1c, 0x99, 0x35, 0x89, 0x61, 0x85, 0xc3, 0x2d, 0xd3};
+GUID FirmwareFileSystem3Guid = EFI_FIRMWARE_FILE_SYSTEM3_GUID;
+
 
 int SetScreenColor (WORD TextColor) {
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -141,21 +156,21 @@ int SetScreenColor (WORD TextColor) {
 
 long InternalGetFileSize (char *FileName)
 {
-	FILE *fp = NULL;
-	long FileSize;
-	
-	FileSize = 0;
+  FILE *fp = NULL;
+  long FileSize;
 
-	fp = fopen(FileName, "rb");
-	if (fp == NULL) {
-		return 0;
-	}
-	
-	fseek (fp, 0, SEEK_END);
-	FileSize = ftell (fp);
-	fclose(fp);
+  FileSize = 0;
 
-	return FileSize;
+  fp = fopen(FileName, "rb");
+  if (fp == NULL) {
+  	return 0;
+  }
+
+  fseek (fp, 0, SEEK_END);
+  FileSize = ftell (fp);
+  fclose(fp);
+
+  return FileSize;
 }
 
 void ShowRawData(u_int8_t *Buffer, u_int64_t size)
@@ -345,51 +360,60 @@ void ShowFvRawData(u_int8_t *Buffer, u_int64_t size)
 
 void PrintGuid (GUID *address)
 {
-	GUID *guid;
+  GUID *guid;
 
-	guid = address;
-	
-	Print ("%08x-",guid->Data1);
-	Print ("%04x-",guid->Data2);
-	Print ("%04x-",guid->Data3);
-	for (int i = 0 ; i < 8 ; i++)
-		Print ("%02x",guid->Data4[i]);
-	Print ("\n");
+  guid = address;
+
+  Print ("%08x-",guid->Data1);
+  Print ("%04x-",guid->Data2);
+  Print ("%04x-",guid->Data3);
+  for (int i = 0 ; i < 8 ; i++)
+    Print ("%02x",guid->Data4[i]);
+//  Print ("\n");
 }
 
 int CompareGuid (GUID *Guid1, GUID *Guid2)
 {
-	if (Guid1->Data1 != Guid2->Data1) {
-		return 0;
-	}
-	if (Guid1->Data2 != Guid2->Data2) {
-		return 0;
-	}
-	if (Guid1->Data3 != Guid2->Data3) {
-		return 0;
-	}
-	for (int i = 0 ; i < 8 ; i++) {
-		if (Guid1->Data4[i] != Guid2->Data4[i]) {
-			return 0;
-		}
-	}
-	return 1;
+  if (Guid1->Data1 != Guid2->Data1) {
+    return 0;
+  }
+  if (Guid1->Data2 != Guid2->Data2) {
+    return 0;
+  }
+  if (Guid1->Data3 != Guid2->Data3) {
+    return 0;
+  }
+  for (int i = 0 ; i < 8 ; i++) {
+    if (Guid1->Data4[i] != Guid2->Data4[i]) {
+  	  return 0;
+    }
+  }
+  return 1;
 }
 
 long ParseFfsHeader (void* address) 
 {
-	EFI_FFS_FILE_HEADER *FfsFileHeader = address;
+  EFI_FFS_FILE_HEADER *FfsFileHeader = address;
 
-	Print ("File Name(GUID): ");
-	PrintGuid (&FfsFileHeader->Name);
+  Print ("File Name(GUID): ");
+  SetScreenColor (LIGHTORANGE_TEXT);
+  PrintGuid (&FfsFileHeader->Name);
+  if (CompareGuid (&FfsFileHeader->Name, &(GUID)EFI_FFS_VOLUME_TOP_FILE_GUID)) {
+    SetScreenColor (RED_TEXT);
+    Print ("  Volume Top File Guid");
+    SetScreenColor (WHITE_TEXT);
+  }
+  Print ("\n");
+  SetScreenColor (WHITE_TEXT);
 
-	Print ("Integrity Check = 0x%04x\n", FfsFileHeader->IntegrityCheck);
-	Print ("Type = 0x%x\n", FfsFileHeader->Type);
-	Print ("FFS Size (including FFS Header): 0x%x (%d)\n", FFS_FILE_SIZE(FfsFileHeader), FFS_FILE_SIZE(FfsFileHeader));
-//	Print ("Is FFS header file 2: %d\n",IS_FFS_FILE2(address));
-	Print ("\n");
+  Print ("Integrity Check                 = 0x%04x\n", FfsFileHeader->IntegrityCheck);
+  Print ("Type                            = 0x%02x\n", FfsFileHeader->Type);
+  Print ("Attribute                       = 0x%02x\n", FfsFileHeader->Attributes);
+  Print ("FFS Size (including FFS Header) = 0x%x (%d)\n", FFS_FILE_SIZE(FfsFileHeader), FFS_FILE_SIZE(FfsFileHeader));
+  Print ("State                           = 0x%02x\n", FfsFileHeader->State);
+  Print ("\n");
 
-	return FFS_FILE_SIZE(FfsFileHeader);
+  return FFS_FILE_SIZE(FfsFileHeader);
 }
 
 void ParseFvHeader(EFI_FIRMWARE_VOLUME_HEADER *FvHeader)
@@ -400,49 +424,68 @@ void ParseFvHeader(EFI_FIRMWARE_VOLUME_HEADER *FvHeader)
 
 	ShowFvRawData ((u_int8_t*)FvHeader, FvHeader->HeaderLength);
 
+  Print("Zero Vector:");
 	for(i = 0 ; i < 16 ; i++)
-		Print ("%x",FvHeader->ZeroVector[i]);
+		Print ("%02x ",FvHeader->ZeroVector[i]);
 	Print("\n");
+  Print ("Guid: ");
+  SetScreenColor (ORANGE_TEXT);
 	PrintGuid (&FvHeader->FileSystemGuid);
+  if (CompareGuid (&FvHeader->FileSystemGuid, &FirmwareFileSystem2Guid)) {
+    SetScreenColor (GREEN_TEXT);
+    Print ("  (FirmwareFileSystem2Guid)");
+  } else if (CompareGuid (&FvHeader->FileSystemGuid, &FirmwareFileSystem3Guid)) {
+    SetScreenColor (BLUE_TEXT);
+    Print ("  (FirmwareFileSystem3Guid)");
+  }
+  Print ("\n");
+  SetScreenColor (WHITE_TEXT);
 
-	Print ("FV Length: 0x%llx (%lld)\n", FvHeader->FvLength, FvHeader->FvLength);	
+	Print ("FV Length            = 0x%llx (%lld)\n", FvHeader->FvLength, FvHeader->FvLength);	
 
 	u_int8_t	*data = (u_int8_t*)&FvHeader->Signature;
-	Print ("%c",*data);
-	Print ("%c",*(data+1));
-	Print ("%c",*(data+2));
-	Print ("%c",*(data+3));
-	Print("\n");
+	Print ("Signature            = %c%c%c%c\n", *data, *(data+1), *(data+2), *(data+3));
 	
-	Print ("FV Attribute: %x\n", FvHeader->Attributes);
-	Print ("Header Length: 0x%x (%d)\n", FvHeader->HeaderLength, FvHeader->HeaderLength);
-	Print ("Check Sum: 0x%x\n", FvHeader->Checksum);
-	Print ("Extend Header Offset: 0x%x\n",FvHeader->ExtHeaderOffset);
-	Print ("Revision: 0x%x\n", FvHeader->Revision);
-	Print ("");
+	Print ("FV Attribute         = 0x%08x\n", FvHeader->Attributes);
+	Print ("Header Length        = 0x%x (%d)\n", FvHeader->HeaderLength, FvHeader->HeaderLength);
+	Print ("Check Sum            = 0x%04x\n", FvHeader->Checksum);
+	Print ("Extend Header Offset = 0x%04x\n",FvHeader->ExtHeaderOffset);
+	Print ("Revision             = 0x%02x\n", FvHeader->Revision);
+	Print ("Number of Block      = 0x%08x\n", FvHeader->BlockMap[0].NumBlocks);
+	Print ("Block Length         = 0x%08x\n", FvHeader->BlockMap[0].Length);
 	Print ("\n\n");
 
 	Print ("%p\n", FvHeader);
 	Print ("%p\n", (u_int8_t*)FvHeader + FvHeader->HeaderLength);
 
-	long FvSize = FvHeader->FvLength;
+
+  //
+  //  Start to parse FFS for this FV.
+  //
+	long FvSize;
 	long FfsSize = 0;
 	u_int8_t *DummyPointer;
 	
 	DummyPointer = (u_int8_t*)FvHeader + FvHeader->HeaderLength;
-//	FfsSize = ParseFfsHeader (DummyPointer);	
+  FvSize = FvHeader->FvLength - FvHeader->HeaderLength;
 
-	while ((FvSize - FfsSize) > 0) {
+	while ((FvSize) > 0) {
 		//
 		//	Debug
 		//
 		Print ("Address: 0x%x\n", DummyPointer - (u_int8_t*)FvHeader);
 
 		FfsSize = ParseFfsHeader (DummyPointer);
+    if (FfsSize == 0xffffff || FfsSize == 0) {
+      Print ("The Final FFS.\n");
+      break;
+    }
 		if (FfsSize % 8 != 0) {
 			FfsSize += (8 - FfsSize % 8);
 		}
+    FvSize -= FfsSize;
 		DummyPointer += FfsSize;
+    Print ("remaining size = 0x%x\n",FvSize);
 	}
 }
 
@@ -452,10 +495,10 @@ void SearchSignature(u_int32_t Signature, u_int8_t *Buffer, u_int8_t Base, u_int
 {
 	int i;
 
-	Print ("Debug\n");
+//	Print ("Debug\n");
 
-	Print ("Base = %x\n", Base);
-	Print ("Range = %x\n", Range);
+//	Print ("Base = %x\n", Base);
+//	Print ("Range = %x\n", Range);
 
 	for (i = Base ; i < Range ; i += sizeof(u_int32_t) / sizeof(u_int8_t)) {
 		if (*(u_int32_t*)&Buffer[i] == Signature) {
@@ -466,8 +509,8 @@ void SearchSignature(u_int32_t Signature, u_int8_t *Buffer, u_int8_t Base, u_int
 			
 			Base = (u_int64_t) ((u_int8_t*) FvHeader - Buffer[0]);
 			Range = FvHeader->FvLength;
-	Print ("Base = %x\n", Base);
-	Print ("Range = %x\n", Range);		
+//	Print ("Base = %x\n", Base);
+//	Print ("Range = %x\n", Range);		
 		}
 	}
 }
@@ -476,13 +519,14 @@ u_int64_t* SearchFvHeaderAddress (u_int8_t *Buffer, long BufferSize, int *Number
 {
 	int i;
 	int Count = 0;
-	GUID FirmwareFileSystem2Guid = {0x8c8ce578, 0x8a3d, 0x4f1c, 0x99, 0x35, 0x89, 0x61, 0x85, 0xc3, 0x2d, 0xd3};
+
 	EFI_FIRMWARE_VOLUME_HEADER *FvHeader;
 	
 	for(i = 0 ; i < BufferSize ; i += sizeof(u_int32_t) / sizeof(u_int8_t)) {
 		FvHeader = CR(&Buffer[i], EFI_FIRMWARE_VOLUME_HEADER, Signature);
 		if (FvHeader->Signature == SIGNATURE_32('_','F','V','H') && 
-			CompareGuid (&FvHeader->FileSystemGuid, &FirmwareFileSystem2Guid)) {
+			    (CompareGuid (&FvHeader->FileSystemGuid, &FirmwareFileSystem2Guid) ||
+			    CompareGuid (&FvHeader->FileSystemGuid, &FirmwareFileSystem3Guid))) {
 			Count++;
 		}
 	}
@@ -495,7 +539,8 @@ u_int64_t* SearchFvHeaderAddress (u_int8_t *Buffer, long BufferSize, int *Number
 	for(i = 0 ; i < BufferSize ; i += sizeof(u_int32_t) / sizeof(u_int8_t)) {
 		FvHeader = CR(&Buffer[i], EFI_FIRMWARE_VOLUME_HEADER, Signature);
 		if (FvHeader->Signature == SIGNATURE_32('_','F','V','H') && 
-			CompareGuid (&FvHeader->FileSystemGuid, &FirmwareFileSystem2Guid)) {
+      (CompareGuid (&FvHeader->FileSystemGuid, &FirmwareFileSystem2Guid) ||
+      CompareGuid (&FvHeader->FileSystemGuid, &FirmwareFileSystem3Guid))) {
 			FvHeaderAddress[Count] = (u_int64_t) FvHeader;
 			Print ("Address %d: %p\n", Count, FvHeaderAddress[Count]);
 			Count++;
@@ -505,14 +550,19 @@ u_int64_t* SearchFvHeaderAddress (u_int8_t *Buffer, long BufferSize, int *Number
 	return FvHeaderAddress;
 }
 
-int main (void)
+int main (int argc, char **argv)
 {
 	FILE	*fp = NULL;
 	long FileSize;
-	
-	fp = fopen (FILE_NAME,"rb");
+
+  if (argc != 2) {
+    Print ("Parameter Error!\n");
+    return ERROR_EXIT;
+  }
+  
+	fp = fopen (argv[1],"rb");
 	if (fp == NULL) {
-		Print ("Open File Error!!!\n");
+		Print ("Open File %s Error!!!\n",argv[1]);
 		return ERROR_EXIT;
 	}
 /*	
@@ -521,7 +571,7 @@ int main (void)
 	Print ("File size = %d\n", FileSize);
 	rewind(fp);
 */
-	FileSize = InternalGetFileSize (FILE_NAME);
+	FileSize = InternalGetFileSize (argv[1]);
 	Print ("File size = %d\n", FileSize);
 
 	u_int8_t *Buffer;
@@ -596,6 +646,8 @@ int main (void)
     SetScreenColor (i);
   }
 */
+  Print ("Done to Parse FV file %s\n", argv[1]);
+
 	free(Buffer);
 	free(FvHeaderAddress);
 }
