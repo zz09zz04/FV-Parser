@@ -194,139 +194,114 @@ void ShowRawData(u_int8_t *Buffer, u_int64_t size)
 void ShowFvRawData(u_int8_t *Buffer, u_int64_t size)
 {
   int i, j;
-	for (i = 0 ; i < size / 16 ; i++) {
-//    Print ("%s","\033[33m");
+  for (i = 0 ; i < size / 16 ; i++) {
     SetScreenColor (ORANGE_TEXT);
-		Print ("%08x:",i * 16);
-//    Print ("%s","\033[39m");
+    Print ("%08x:",i * 16);
     SetScreenColor (WHITE_TEXT);
-		for (j = 0 ; j < 16 ; j++) {
-			if (i * 16 + j >= 16) {
-//				Print ("\033[32m");
-      SetScreenColor (BLUE_TEXT);
-			}
-			if (i * 16 + j >= 32) {
-//				Print ("\033[34m");
-      SetScreenColor (GREEN_TEXT);
-			}
-			if (i * 16 + j >= 40) {
-//				Print ("\033[31m");
-      SetScreenColor (RED_TEXT);
-			}
-			if (i * 16 + j >= 44) {
-//				Print ("\033[35m");
-      SetScreenColor (CYAN_TEXT);
-			}
-			if (i * 16 + j >= 48) {
-//				Print ("\033[31m");
-      SetScreenColor (PURPLE_TEXT);
-			}
-			if (i * 16 + j >= 50) {
-//				Print ("\033[33m");
-      SetScreenColor (LIGHTBLUE_TEXT);
-			}
-			if (i * 16 + j >= 52) {
-//				Print ("\033[32m");
-      SetScreenColor (LIGHTGREEN_TEXT);
-			}
-			if (i * 16 + j >= 54) {
-//				Print ("\033[39m");
-      SetScreenColor (LIGHTRED_TEXT);
-			}
-			if (i * 16 + j >= 55) {
-//				Print ("\033[35m");
-      SetScreenColor (LIGHTCYAN_TEXT);
-			}
-			if (i * 16 + j >= 56) {
-//				Print ("\033[36m");
-      SetScreenColor (WHITE_TEXT);
-			}
-			if (i * 16 + j >= 72) {
-//				Print ("\033[39m");
-      SetScreenColor (LIGHTPURPLE_TEXT);
-			}
-			Print (" %02x", Buffer[i*16+j]);
-		}
-		Print ("  ");
-		for (j = 0 ; j < 16 ; j++) {
+    for (j = 0 ; j < 16 ; j++) {
       if (i * 16 + j >= 16) {
-//        Print ("\033[32m");
-      SetScreenColor (BLUE_TEXT);
+        SetScreenColor (BLUE_TEXT);
       }
       if (i * 16 + j >= 32) {
-//        Print ("\033[34m");
-      SetScreenColor (GREEN_TEXT);
+        SetScreenColor (GREEN_TEXT);
       }
       if (i * 16 + j >= 40) {
-//        Print ("\033[31m");
-      SetScreenColor (RED_TEXT);
+        SetScreenColor (RED_TEXT);
       }
       if (i * 16 + j >= 44) {
-//        Print ("\033[35m");
-      SetScreenColor (CYAN_TEXT);
+        SetScreenColor (CYAN_TEXT);
       }
       if (i * 16 + j >= 48) {
-//        Print ("\033[31m");
-      SetScreenColor (PURPLE_TEXT);
+        SetScreenColor (PURPLE_TEXT);
       }
       if (i * 16 + j >= 50) {
-//        Print ("\033[33m");
-      SetScreenColor (LIGHTBLUE_TEXT);
+        SetScreenColor (LIGHTBLUE_TEXT);
       }
       if (i * 16 + j >= 52) {
-//        Print ("\033[32m");
-      SetScreenColor (LIGHTGREEN_TEXT);
+        SetScreenColor (LIGHTGREEN_TEXT);
       }
       if (i * 16 + j >= 54) {
-//        Print ("\033[39m");
-      SetScreenColor (LIGHTRED_TEXT);
+        SetScreenColor (LIGHTRED_TEXT);
       }
       if (i * 16 + j >= 55) {
-//        Print ("\033[35m");
-      SetScreenColor (LIGHTCYAN_TEXT);
+        SetScreenColor (LIGHTCYAN_TEXT);
       }
       if (i * 16 + j >= 56) {
-//        Print ("\033[36m");
-      SetScreenColor (WHITE_TEXT);
+        SetScreenColor (WHITE_TEXT);
       }
       if (i * 16 + j >= 72) {
-//        Print ("\033[39m");
-      SetScreenColor (LIGHTPURPLE_TEXT);
+        SetScreenColor (LIGHTPURPLE_TEXT);
       }
-			u_int8_t data = Buffer[i*16+j];
+      Print (" %02x", Buffer[i*16+j]);
+    }
+    Print ("  ");
+    for (j = 0 ; j < 16 ; j++) {
+      if (i * 16 + j >= 16) {
+        SetScreenColor (BLUE_TEXT);
+      }
+      if (i * 16 + j >= 32) {
+        SetScreenColor (GREEN_TEXT);
+      }
+      if (i * 16 + j >= 40) {
+        SetScreenColor (RED_TEXT);
+      }
+      if (i * 16 + j >= 44) {
+        SetScreenColor (CYAN_TEXT);
+      }
+      if (i * 16 + j >= 48) {
+        SetScreenColor (PURPLE_TEXT);
+      }
+      if (i * 16 + j >= 50) {
+        SetScreenColor (LIGHTBLUE_TEXT);
+      }
+      if (i * 16 + j >= 52) {
+        SetScreenColor (LIGHTGREEN_TEXT);
+      }
+      if (i * 16 + j >= 54) {
+        SetScreenColor (LIGHTRED_TEXT);
+      }
+      if (i * 16 + j >= 55) {
+        SetScreenColor (LIGHTCYAN_TEXT);
+      }
+      if (i * 16 + j >= 56) {
+        SetScreenColor (WHITE_TEXT);
+      }
+      if (i * 16 + j >= 72) {
+        SetScreenColor (LIGHTPURPLE_TEXT);
+      }
+      u_int8_t data = Buffer[i*16+j];
 
-			if (data >= 0x20 && data <= 0x7E) {
-				Print ("%c",data);
-			} else {
-				Print (".");
-			}
-		}
-		Print ("\n");
-	}
-	if (size % 16 != 0) {
-//		Print ("%s","\033[33m");
+      if (data >= 0x20 && data <= 0x7E) {
+        Print ("%c",data);
+      } else {
+        Print (".");
+      }
+    }
+    Print ("\n");
+  }
+  if (size % 16 != 0) {
     SetScreenColor (ORANGE_TEXT);
-		Print ("%08x:",size / 16 * 16);
-//		Print ("%s","\033[39m");
+    Print ("%08x:",size / 16 * 16);
     SetScreenColor (WHITE_TEXT);
-		for (j = 0 ; j < 16 ; j++) {
-			if (j > size % 16 - 1) {
-				Print ("   ");
-			} else {
-				Print (" %02x", Buffer[size / 16 * 16 + j]);
-			}
-		}
-		Print ("  ");
-		for (j = 0 ; j < size % 16 ; j++) {
-			u_int8_t data = Buffer[size / 16 * 16 + j];
-			if (data >= 0x20 && data <= 0x7E) {
-				Print ("%c",data);
-			} else {
-				Print (".");
-			}
-		}
-		Print ("\n");
-	}
+    
+    for (j = 0 ; j < 16 ; j++) {
+      if (j > size % 16 - 1) {
+        Print ("   ");
+      } else {
+        Print (" %02x", Buffer[size / 16 * 16 + j]);
+      }
+    }
+    Print ("  ");
+    for (j = 0 ; j < size % 16 ; j++) {
+      u_int8_t data = Buffer[size / 16 * 16 + j];
+      if (data >= 0x20 && data <= 0x7E) {
+        Print ("%c",data);
+      } else {
+        Print (".");
+      }
+    }
+    Print ("\n");
+  }
 }
 
 void PrintGuid (GUID *address)
@@ -389,19 +364,19 @@ long ParseFfsHeader (void* address)
 
 void ParseFvHeader(EFI_FIRMWARE_VOLUME_HEADER *FvHeader)
 {
-	int i;
-  
-	Print ("Start to Parse FV Header\n");
+  int i;
 
-	ShowFvRawData ((u_int8_t*)FvHeader, FvHeader->HeaderLength);
+  Print ("Start to Parse FV Header\n");
+
+  ShowFvRawData ((u_int8_t*)FvHeader, FvHeader->HeaderLength);
 
   Print("Zero Vector:");
-	for(i = 0 ; i < 16 ; i++)
-		Print ("%02x ",FvHeader->ZeroVector[i]);
-	Print("\n");
+  for(i = 0 ; i < 16 ; i++)
+  Print ("%02x ",FvHeader->ZeroVector[i]);
+  Print("\n");
   Print ("Guid: ");
   SetScreenColor (ORANGE_TEXT);
-	PrintGuid (&FvHeader->FileSystemGuid);
+  PrintGuid (&FvHeader->FileSystemGuid);
   if (CompareGuid (&FvHeader->FileSystemGuid, &FirmwareFileSystem2Guid)) {
     SetScreenColor (GREEN_TEXT);
     Print ("  (FirmwareFileSystem2Guid)");
@@ -412,113 +387,106 @@ void ParseFvHeader(EFI_FIRMWARE_VOLUME_HEADER *FvHeader)
   Print ("\n");
   SetScreenColor (WHITE_TEXT);
 
-	Print ("FV Length            = 0x%llx (%lld)\n", FvHeader->FvLength, FvHeader->FvLength);	
+  Print ("FV Length            = 0x%llx (%lld)\n", FvHeader->FvLength, FvHeader->FvLength);	
 
-	u_int8_t	*data = (u_int8_t*)&FvHeader->Signature;
-	Print ("Signature            = %c%c%c%c\n", *data, *(data+1), *(data+2), *(data+3));
-	
-	Print ("FV Attribute         = 0x%08x\n", FvHeader->Attributes);
-	Print ("Header Length        = 0x%x (%d)\n", FvHeader->HeaderLength, FvHeader->HeaderLength);
-	Print ("Check Sum            = 0x%04x\n", FvHeader->Checksum);
-	Print ("Extend Header Offset = 0x%04x\n",FvHeader->ExtHeaderOffset);
-	Print ("Revision             = 0x%02x\n", FvHeader->Revision);
-	Print ("Number of Block      = 0x%08x\n", FvHeader->BlockMap[0].NumBlocks);
-	Print ("Block Length         = 0x%08x\n", FvHeader->BlockMap[0].Length);
-	Print ("\n\n");
+  u_int8_t	*data = (u_int8_t*)&FvHeader->Signature;
+  Print ("Signature            = %c%c%c%c\n", *data, *(data+1), *(data+2), *(data+3));
 
-	Print ("%p\n", FvHeader);
-	Print ("%p\n", (u_int8_t*)FvHeader + FvHeader->HeaderLength);
+  Print ("FV Attribute         = 0x%08x\n", FvHeader->Attributes);
+  Print ("Header Length        = 0x%x (%d)\n", FvHeader->HeaderLength, FvHeader->HeaderLength);
+  Print ("Check Sum            = 0x%04x\n", FvHeader->Checksum);
+  Print ("Extend Header Offset = 0x%04x\n",FvHeader->ExtHeaderOffset);
+  Print ("Revision             = 0x%02x\n", FvHeader->Revision);
+  Print ("Number of Block      = 0x%08x\n", FvHeader->BlockMap[0].NumBlocks);
+  Print ("Block Length         = 0x%08x\n", FvHeader->BlockMap[0].Length);
+  Print ("\n\n");
+
+  Print ("%p\n", FvHeader);
+  Print ("%p\n", (u_int8_t*)FvHeader + FvHeader->HeaderLength);
 
 
   //
   //  Start to parse FFS for this FV.
   //
-	long FvSize;
-	long FfsSize = 0;
-	u_int8_t *DummyPointer;
-	
-	DummyPointer = (u_int8_t*)FvHeader + FvHeader->HeaderLength;
+  long FvSize;
+  long FfsSize = 0;
+  u_int8_t *DummyPointer;
+
+  DummyPointer = (u_int8_t*)FvHeader + FvHeader->HeaderLength;
   FvSize = FvHeader->FvLength - FvHeader->HeaderLength;
 
-	while ((FvSize) > 0) {
-		//
-		//	Debug
-		//
-		Print ("Address: 0x%x\n", DummyPointer - (u_int8_t*)FvHeader);
+  while ((FvSize) > 0) {
+    //
+    //	Debug
+    //
+    Print ("Address: 0x%x\n", DummyPointer - (u_int8_t*)FvHeader);
 
-		FfsSize = ParseFfsHeader (DummyPointer);
+    FfsSize = ParseFfsHeader (DummyPointer);
     if (FfsSize == 0xffffff || FfsSize == 0) {
       Print ("The Final FFS.\n");
       break;
     }
-		if (FfsSize % 8 != 0) {
-			FfsSize += (8 - FfsSize % 8);
-		}
+    if (FfsSize % 8 != 0) {
+      FfsSize += (8 - FfsSize % 8);
+    }
     FvSize -= FfsSize;
-		DummyPointer += FfsSize;
+    DummyPointer += FfsSize;
     Print ("remaining size = 0x%x\n",FvSize);
-	}
+  }
 }
 
 
 
 void SearchSignature(u_int32_t Signature, u_int8_t *Buffer, u_int8_t Base, u_int64_t Range)
 {
-	int i;
+  int i;
 
-//	Print ("Debug\n");
+  for (i = Base ; i < Range ; i += sizeof(u_int32_t) / sizeof(u_int8_t)) {
+    if (*(u_int32_t*)&Buffer[i] == Signature) {
+      Print("Found \"_FVH\" at %x\n",i);
+      Print ("%p\n",&Buffer[i]);
+      EFI_FIRMWARE_VOLUME_HEADER *FvHeader = CR(&Buffer[i], EFI_FIRMWARE_VOLUME_HEADER, Signature);
+      ParseFvHeader (FvHeader);
 
-//	Print ("Base = %x\n", Base);
-//	Print ("Range = %x\n", Range);
-
-	for (i = Base ; i < Range ; i += sizeof(u_int32_t) / sizeof(u_int8_t)) {
-		if (*(u_int32_t*)&Buffer[i] == Signature) {
-			Print("Found \"_FVH\" at %x\n",i);
-			Print ("%p\n",&Buffer[i]);
-			EFI_FIRMWARE_VOLUME_HEADER *FvHeader = CR(&Buffer[i], EFI_FIRMWARE_VOLUME_HEADER, Signature);
-			ParseFvHeader (FvHeader);
-			
-			Base = (u_int64_t) ((u_int8_t*) FvHeader - Buffer[0]);
-			Range = FvHeader->FvLength;
-//	Print ("Base = %x\n", Base);
-//	Print ("Range = %x\n", Range);		
-		}
-	}
+      Base = (u_int64_t) ((u_int8_t*) FvHeader - Buffer[0]);
+      Range = FvHeader->FvLength;
+    }
+  }
 }
 
 u_int64_t* SearchFvHeaderAddress (u_int8_t *Buffer, long BufferSize, int *NumberOfFvHeader)
 {
-	int i;
-	int Count = 0;
+  int i;
+  int Count = 0;
 
-	EFI_FIRMWARE_VOLUME_HEADER *FvHeader;
-	
-	for(i = 0 ; i < BufferSize ; i += sizeof(u_int32_t) / sizeof(u_int8_t)) {
-		FvHeader = CR(&Buffer[i], EFI_FIRMWARE_VOLUME_HEADER, Signature);
-		if (FvHeader->Signature == SIGNATURE_32('_','F','V','H') && 
-			    (CompareGuid (&FvHeader->FileSystemGuid, &FirmwareFileSystem2Guid) ||
-			    CompareGuid (&FvHeader->FileSystemGuid, &FirmwareFileSystem3Guid))) {
-			Count++;
-		}
-	}
-	Print ("Fv Header Count:%d\n",Count);
-	
-	u_int64_t *FvHeaderAddress;
-	FvHeaderAddress = malloc (Count * sizeof (u_int64_t));
+  EFI_FIRMWARE_VOLUME_HEADER *FvHeader;
 
-	Count = 0;
-	for(i = 0 ; i < BufferSize ; i += sizeof(u_int32_t) / sizeof(u_int8_t)) {
-		FvHeader = CR(&Buffer[i], EFI_FIRMWARE_VOLUME_HEADER, Signature);
-		if (FvHeader->Signature == SIGNATURE_32('_','F','V','H') && 
-      (CompareGuid (&FvHeader->FileSystemGuid, &FirmwareFileSystem2Guid) ||
-      CompareGuid (&FvHeader->FileSystemGuid, &FirmwareFileSystem3Guid))) {
-			FvHeaderAddress[Count] = (u_int64_t) FvHeader;
-			Print ("Address %d: %p\n", Count, FvHeaderAddress[Count]);
-			Count++;
-		}
-	}
-	*NumberOfFvHeader = Count;
-	return FvHeaderAddress;
+  for(i = 0 ; i < BufferSize ; i += sizeof(u_int32_t) / sizeof(u_int8_t)) {
+    FvHeader = CR(&Buffer[i], EFI_FIRMWARE_VOLUME_HEADER, Signature);
+    if (FvHeader->Signature == SIGNATURE_32('_','F','V','H') && 
+           (CompareGuid (&FvHeader->FileSystemGuid, &FirmwareFileSystem2Guid) ||
+            CompareGuid (&FvHeader->FileSystemGuid, &FirmwareFileSystem3Guid))) {
+      Count++;
+    }
+  }
+  Print ("Fv Header Count:%d\n",Count);
+
+  u_int64_t *FvHeaderAddress;
+  FvHeaderAddress = malloc (Count * sizeof (u_int64_t));
+
+  Count = 0;
+  for(i = 0 ; i < BufferSize ; i += sizeof(u_int32_t) / sizeof(u_int8_t)) {
+    FvHeader = CR(&Buffer[i], EFI_FIRMWARE_VOLUME_HEADER, Signature);
+    if (FvHeader->Signature == SIGNATURE_32('_','F','V','H') && 
+          (CompareGuid (&FvHeader->FileSystemGuid, &FirmwareFileSystem2Guid) ||
+           CompareGuid (&FvHeader->FileSystemGuid, &FirmwareFileSystem3Guid))) {
+      FvHeaderAddress[Count] = (u_int64_t) FvHeader;
+      Print ("Address %d: %p\n", Count, FvHeaderAddress[Count]);
+      Count++;
+    }
+  }
+  *NumberOfFvHeader = Count;
+  return FvHeaderAddress;
 }
 
 int main (int argc, char **argv)
