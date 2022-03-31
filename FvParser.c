@@ -23,7 +23,7 @@ typedef struct {
 
 #endif
 
-#define EFI_FIRMWARE_FILE_SYSTEM2_GUID	 { 0x8c8ce578, 0x8a3d, 0x4f1c, { 0x99, 0x35, 0x89, 0x61, 0x85, 0xc3, 0x2d, 0xd3 } }
+#define EFI_FIRMWARE_FILE_SYSTEM2_GUID	{ 0x8c8ce578, 0x8a3d, 0x4f1c, { 0x99, 0x35, 0x89, 0x61, 0x85, 0xc3, 0x2d, 0xd3 } }
 #define EFI_FIRMWARE_FILE_SYSTEM3_GUID  { 0x5473c07a, 0x3dcb, 0x4dca, { 0xbd, 0x6f, 0x1e, 0x96, 0x89, 0xe7, 0x34, 0x9a } }
 #define EFI_FFS_VOLUME_TOP_FILE_GUID    { 0x1BA0062E, 0xC779, 0x4582, { 0x85, 0x66, 0x33, 0x6A, 0xE8, 0xF7, 0x8F, 0x9 } }
 
@@ -337,9 +337,41 @@ int CompareGuid (GUID *Guid1, GUID *Guid2)
   return 1;
 }
 
+char* ParseFvFileTypeWorker (EFI_FV_FILETYPE Type) {
+  const char* FvFileType[0x10] = { 
+                        NULL,
+                        "Raw",
+                        "FreeForm",
+                        "SEC Core",
+                        "PEI Core",
+                        "DXE Core",
+                        "PEIM",
+                        "Driver",
+                        "Combined PEIM Driver",
+                        "Application",
+                        "MM",
+                        "FV Image",
+                        "Combined MM DXE",
+                        "MM Core",
+                        "MM Stand alone",
+                        "MM Core Stand alone"
+                        };
+  if (Type == 0xF0) {
+    return "Pad File";
+  }
+  if (Type >= 0x10) {
+    return NULL;
+  }
+  return FvFileType[Type];
+}
+
 long ParseFfsHeader (void* address) 
 {
   EFI_FFS_FILE_HEADER *FfsFileHeader = address;
+
+  if (FFS_FILE_SIZE(FfsFileHeader) == 0xffffff) {
+    return FFS_FILE_SIZE(FfsFileHeader);
+  }
 
   Print ("File Name(GUID): ");
   SetScreenColor (LIGHTORANGE_TEXT);
@@ -353,7 +385,7 @@ long ParseFfsHeader (void* address)
   SetScreenColor (WHITE_TEXT);
 
   Print ("Integrity Check                 = 0x%04x\n", FfsFileHeader->IntegrityCheck);
-  Print ("Type                            = 0x%02x\n", FfsFileHeader->Type);
+  Print ("Type                            = 0x%02x (%s)\n", FfsFileHeader->Type, ParseFvFileTypeWorker(FfsFileHeader->Type));
   Print ("Attribute                       = 0x%02x\n", FfsFileHeader->Attributes);
   Print ("FFS Size (including FFS Header) = 0x%x (%d)\n", FFS_FILE_SIZE(FfsFileHeader), FFS_FILE_SIZE(FfsFileHeader));
   Print ("State                           = 0x%02x\n", FfsFileHeader->State);
@@ -491,38 +523,38 @@ u_int64_t* SearchFvHeaderAddress (u_int8_t *Buffer, long BufferSize, int *Number
 
 int main (int argc, char **argv)
 {
-	FILE	*fp = NULL;
-	long FileSize;
+  FILE  *fp = NULL;
+  long  FileSize;
 
   if (argc != 2) {
     Print ("Parameter Error!\n");
     return ERROR_EXIT;
   }
   
-	fp = fopen (argv[1],"rb");
-	if (fp == NULL) {
-		Print ("Open File %s Error!!!\n",argv[1]);
-		return ERROR_EXIT;
-	}
+  fp = fopen (argv[1],"rb");
+  if (fp == NULL) {
+    Print ("Open File %s Error!!!\n",argv[1]);
+    return ERROR_EXIT;
+  }
 /*	
 	fseek (fp, 0, SEEK_END);
 	FileSize = ftell (fp);
 	Print ("File size = %d\n", FileSize);
 	rewind(fp);
 */
-	FileSize = InternalGetFileSize (argv[1]);
-	Print ("File size = %d\n", FileSize);
+  FileSize = InternalGetFileSize (argv[1]);
+  Print ("File size = %d\n", FileSize);
 
-	u_int8_t *Buffer;
-	Buffer = malloc (FileSize * sizeof(u_int8_t));
-	long ReadDataSize;
-	if (FileSize != fread (Buffer, sizeof(u_int8_t), FileSize, fp)) {
-		Print("Read File Error!!!\n");
-	}
+  u_int8_t *Buffer;
+  Buffer = malloc (FileSize * sizeof(u_int8_t));
+  long ReadDataSize;
+  if (FileSize != fread (Buffer, sizeof(u_int8_t), FileSize, fp)) {
+    Print("Read File Error!!!\n");
+  }
 
-	fclose(fp);
+  fclose(fp);
 
-	Print ("size: %d\n", sizeof(u_int8_t));
+  Print ("size: %d\n", sizeof(u_int8_t));
 
 
 /*
@@ -551,17 +583,16 @@ int main (int argc, char **argv)
 		}
 	}
 */
-	Print ("Debug\n");
 //	SearchSignature (SIGNATURE_32('_','F','V','H'), Buffer, 0, (u_int64_t) FileSize);
 
-	u_int64_t *FvHeaderAddress;
-	int NumberOfFvHeader;
-	FvHeaderAddress = SearchFvHeaderAddress (Buffer, FileSize, &NumberOfFvHeader);
+  u_int64_t *FvHeaderAddress;
+  int NumberOfFvHeader;
+  FvHeaderAddress = SearchFvHeaderAddress (Buffer, FileSize, &NumberOfFvHeader);
   int i;
 
-	for (i = 0 ; i < NumberOfFvHeader ; i++) {
-		ParseFvHeader ((EFI_FIRMWARE_VOLUME_HEADER*)FvHeaderAddress[i]);
-	}
+  for (i = 0 ; i < NumberOfFvHeader ; i++) {
+    ParseFvHeader ((EFI_FIRMWARE_VOLUME_HEADER*)FvHeaderAddress[i]);
+  }
 
 //	ShowFvRawData ((u_int8_t*)FvHeaderAddress[0], 0x70000);
 //	ShowFvRawData (Buffer, FileSize);
@@ -587,8 +618,8 @@ int main (int argc, char **argv)
 */
   Print ("Done to Parse FV file %s\n", argv[1]);
 
-	free(Buffer);
-	free(FvHeaderAddress);
+  free(Buffer);
+  free(FvHeaderAddress);
 }
 
 

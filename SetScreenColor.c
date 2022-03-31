@@ -3,7 +3,7 @@
 
 #if defined(__unix) || defined(__unix__) || defined(__LINUX__)
 
-#define RED_TEXT			   "\033[31m"
+#define RED_TEXT			      "\033[31m"
 #define GREEN_TEXT          "\033[32m"
 #define ORANGE_TEXT         "\033[33m"
 #define BLUE_TEXT           "\033[34m"
